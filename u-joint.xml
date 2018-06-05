@@ -1,0 +1,461 @@
+<?xml version="1.0"?>
+<robot name="myfirst"  xmlns:xacro="http://ros.org/wiki/xacro">
+   
+
+
+   <!-- SAT 0603  20:00PM body_l->10cm  mass-> 1 -->
+  
+  <!--  w=width=x  l=lenth=y t=thickness=z   a=side -->
+  <xacro:property name="cy_l" value="0.1" />
+  <xacro:property name="cy_r" value="0.02" />
+  <xacro:property name="reel_l" value="0.01" />
+
+  <xacro:property name="base_w" value="0.1" />
+  <xacro:property name="base_l" value="0.02" />  
+  <xacro:property name="base_t" value="0.1" />
+  <xacro:property name="cover_a" value="0.1" />
+  <xacro:property name="cover_t" value="0.01" />
+
+  <xacro:property name="body_w" value="0.1" />
+  <xacro:property name="body_l" value="1" />
+  <xacro:property name="body_t" value="0.1" />
+
+  <xacro:property name="leg_w" value="0.2" />
+  <xacro:property name="leg_l" value="0.1" />
+  <xacro:property name="leg_t" value="0.1" />
+
+  <xacro:property name="foot_w" value="0.1" />
+  <xacro:property name="foot_l" value="0.1" />
+  <xacro:property name="foot_t" value="0.2" />
+
+   <xacro:property name="pi" value="3.14" />
+
+  <xacro:property name="velocity" value="10"/>
+
+  <xacro:property name="body_mass" value="0.1"/>
+  <xacro:property name="base_mass" value="0.003"/>
+  <xacro:property name="cover_mass" value="0.001"/>
+  <xacro:property name="leg_mass" value="0.01"/>
+  <xacro:property name="foot_mass" value="0.01"/>
+
+  <!--      COLOR FOR MATERIAL       -->
+  <material name="color1">
+    <color rgba="0 0.4 0.8 1"/>
+  </material>
+  <material name="color2">
+    <color rgba="0 0.8 0.8 1"/>
+  </material>
+
+  <material name="clr_org">
+    <color rgba="1 0.5 0 1"/>
+  </material>
+
+  <material name="clr_pink">
+    <color rgba="1 0.75 0.8 1"/>
+  </material>
+
+    <material name="clr_red">
+    <color rgba="1 0 0 1"/>
+  </material>
+
+  <!--MASS-->
+  <xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+  </xacro:macro>
+
+
+
+
+ <!--          CAT MODEL MAIN BODY           -->
+  <link name="base_link">  
+    <visual>  
+      <geometry>  
+        <cylinder length="${cy_l}" radius="${cy_r}"/>
+      </geometry>  
+      <material name="clr_org"/>  
+    </visual>  
+    <collision>  
+      <geometry>  
+        <cylinder length="${cy_l}" radius="${cy_r}"/> 
+      </geometry>  
+    </collision>  
+    <xacro:default_inertial mass="${body_mass}"/> 
+  </link>  
+
+  <link name="uj_orient">  
+    <visual>  
+      <geometry>  
+        <cylinder length="${cy_l}" radius="${cy_r}"/>  
+        <origin xyz="0 0 0" rpy="0 0 0" />  
+      </geometry>  
+      <material name="clr_pink"/>  
+    </visual>  
+    <collision>  
+      <geometry>  
+        <cylinder length="${cy_l}" radius="${cy_r}"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />  
+      </geometry>  
+    </collision>  
+    <xacro:default_inertial mass="${body_mass}"/> 
+  </link>  
+
+  <joint name="cross_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="uj_orient"/>
+    <origin rpy = "0 1.5707 0" xyz="0 0 0"/>
+  </joint>
+
+
+  <!--  rotate component  -->
+
+  <link name="reel1">  
+    <visual>  
+      <geometry>  
+        <cylinder length="${reel_l}" radius="${cy_r}"/>  
+        <origin xyz="0 0 0" rpy="0 0 0" />  
+      </geometry>  
+      <material name="clr_red"/>  
+    </visual>  
+    <collision>  
+      <geometry>  
+        <cylinder length="${reel_l}" radius="${cy_r}"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />  
+      </geometry>  
+    </collision>  
+    <xacro:default_inertial mass="${body_mass}"/> 
+  </link>  
+
+  <link name="reel2">  
+    <visual>  
+      <geometry>  
+        <cylinder length="${reel_l}" radius="${cy_r}"/>  
+        <origin xyz="0 0 0" rpy="0 1.5707 0" />  
+      </geometry>  
+      <material name="clr_red"/>  
+    </visual>  
+    <collision>  
+      <geometry>  
+        <cylinder length="${reel_l}" radius="${cy_r}"/>
+        <origin xyz="0 0 0" rpy="0 1.5707 0" />  
+      </geometry>  
+    </collision>  
+    <xacro:default_inertial mass="${body_mass}"/> 
+  </link>  
+
+  <!-- <joint name="base_to_reel1_joint" type="revolute"> -->
+  <joint name="base_to_upper" type="revolute">
+    <parent link="base_link"/>
+    <child link="reel1"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-2.7" upper="2.7" velocity="${velocity}"/>
+    <origin xyz="0 0 0"/>
+    <joint_properties damping="1.0" friction="1.0"/>
+  </joint>
+
+  <!-- <joint name="uj_to_reel12_joint" type="revolute"> -->
+  <joint name="base_to_lower" type="revolute">
+    <parent link="uj_orient"/>
+    <child link="reel2"/>
+    <axis xyz="0 0 1 "/>
+    <limit effort="1000.0" lower="-2.7" upper="2.7" velocity="${velocity}"/>
+    <origin xyz=" 0 0 0"/>
+    <joint_properties damping="1.0" friction="1.0"/>
+  </joint>
+
+  <joint name="reel1_to_upper_joint" type="fixed">
+    <parent link="reel1"/>
+    <child link="upper_body"/>
+    <origin xyz="0 -0.02 0"/>
+  </joint>
+
+  <joint name="reel2_to_lower_joint" type="fixed">
+    <parent link="reel2"/>
+    <child link="lower_body"/>
+    <origin xyz="0 0.02 0"  rpy=" 0 -1.5707 0"/>
+  </joint>
+
+  <link name="upper_body">
+    <visual>
+      <geometry>
+        <box size=" ${body_w} ${body_l} ${body_t} "/>
+      </geometry>
+      <origin xyz=" 0 ${-(body_l/2)} 0 "/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size=" ${body_w} ${body_l} ${body_t} "/>
+      </geometry>
+      <origin xyz=" 0 ${-(body_l/2)} 0 "/>
+      <!-- <origin xyz=" 0 ${-(body_l/2-cover_a/2)} 0 "/> -->
+    </collision>
+    <xacro:default_inertial mass="${body_mass}"/>
+  </link>
+
+  <link name="lower_body">
+    <visual>
+      <geometry>
+        <box size=" ${body_w} ${body_l} ${body_t} "/>
+      </geometry>
+      <origin xyz=" 0 ${(body_l/2)} 0 "/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size=" ${body_w} ${body_l} ${body_t} "/>
+      </geometry>
+      <origin xyz=" 0 ${(body_l/2)} 0 "/>
+    </collision>
+    <xacro:default_inertial mass="${body_mass}"/>
+  </link>
+
+
+  <!--   upper leg & foot   -->
+  <joint name="up_l_body_to_leg" type="fixed">
+    <parent link="upper_body"/>
+    <child link="upper_left_leg"/>
+    <origin xyz="${body_w/2} ${-(body_l/2+base_l/2)} ${-body_t/2}"/>
+  </joint>
+
+  <link name="upper_left_leg">
+    <visual>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${leg_w/2} 0 ${-leg_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${leg_w/2} 0 ${-leg_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${leg_mass}"/>
+  </link>
+
+  <joint name="up_r_body_to_leg" type="fixed">
+    <parent link="upper_body"/>
+    <child link="upper_right_leg"/>
+    <origin xyz="${-body_w/2} ${-(body_l/2+base_l/2)} ${-body_t/2}"/>
+  </joint>
+
+  <link name="upper_right_leg">
+    <visual>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${-leg_w/2} 0 ${-leg_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${-leg_w/2} 0 ${-leg_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${leg_mass}"/>
+  </link>
+
+  <joint name="up_l_leg_to_foot" type="fixed">
+    <parent link="upper_left_leg"/>
+    <child link="upper_left_foot"/>
+    <origin xyz="${leg_w} 0 ${-leg_t}"/>
+  </joint>
+
+  <link name="upper_left_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${foot_w/2} 0 ${-foot_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${foot_w/2} 0 ${-foot_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${foot_mass}"/>
+  </link>
+
+  <joint name="up_r_leg_to_foot" type="fixed">
+    <parent link="upper_right_leg"/>
+    <child link="upper_right_foot"/>
+    <origin xyz="${-leg_w} 0 ${-leg_t}"/>
+  </joint>
+
+  <link name="upper_right_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${-foot_w/2} 0 ${-foot_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${-foot_w/2} 0 ${-foot_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${foot_mass}"/>
+  </link>
+
+
+
+  <!--   lower leg & foot   -->
+  <joint name="low_l_body_to_leg" type="fixed">
+    <parent link="lower_body"/>
+    <child link="lower_left_leg"/>
+    <origin xyz="${body_w/2} ${body_l/2+base_l/2} ${-body_t/2}"/>
+  </joint>
+
+  <link name="lower_left_leg">
+    <visual>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${leg_w/2} 0 ${-leg_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${leg_w/2} 0 ${-leg_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${leg_mass}"/>
+  </link>
+
+  <joint name="low_r_body_to_leg" type="fixed">
+    <parent link="lower_body"/>
+    <child link="lower_right_leg"/>
+    <origin xyz="${-body_w/2} ${body_l/2+base_l/2} ${-body_t/2}"/>
+  </joint>
+
+  <link name="lower_right_leg">
+    <visual>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${-leg_w/2} 0 ${-leg_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${leg_w} ${leg_l} ${leg_t}"/>
+      </geometry>
+      <origin xyz="${-leg_w/2} 0 ${-leg_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${leg_mass}"/>
+  </link>
+
+  <!--LOWER LEFT FOOT-->
+  <joint name="low_l_leg_to_foot" type="fixed">
+    <parent link="lower_left_leg"/>
+    <child link="lower_left_foot"/>
+    <origin xyz="${leg_w} 0 ${-leg_t}"/>
+  </joint>
+
+  <link name="lower_left_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${foot_w/2} 0 ${-foot_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${foot_w/2} 0 ${-foot_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${foot_mass}"/>
+  </link>
+
+  <!--LOWER RIGHT FOOT-->
+  <joint name="low_r_leg_to_foot" type="fixed">
+    <parent link="lower_right_leg"/>
+    <child link="lower_right_foot"/>
+    <origin xyz="${-leg_w} 0 ${-leg_t}"/>
+  </joint>
+
+  <link name="lower_right_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${-foot_w/2} 0 ${-foot_t/2}"/>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_w} ${foot_l} ${foot_t} "/>
+      </geometry>
+      <origin xyz="${-foot_w/2} 0 ${-foot_t/2}"/>
+    </collision>
+    <xacro:default_inertial mass="${foot_mass}"/>
+  </link>
+
+
+<!-- transmission -->
+
+  <transmission name="base_to_lower_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="base_to_lower_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="base_to_lower">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <transmission name="base_to_upper_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="base_to_upper_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+    <joint name="base_to_upper">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+
+
+
+<!--               Gazebo plugin for ROS Control          -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+
+
+<gazebo reference="base_link">
+  <kp>50</kp>
+  <ki>20</ki>
+  <kd>0</kd>
+  <mu1>8</mu1>
+  <mu2>8</mu2>
+  <maxVel>0</maxVel>
+</gazebo>
+
+<gazebo reference="uj_orient">
+  <kp>50</kp>
+  <ki>20</ki>
+  <kd>0</kd>
+  <mu1>8</mu1>
+  <mu2>8</mu2>
+  <maxVel>0</maxVel>
+</gazebo>
+
+  
+</robot>
